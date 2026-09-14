@@ -10,14 +10,16 @@ MIN_RATING = 1
 MAX_RATING = 5
 
 
-# Проверяет, можно ли добавить посещение: есть название и мероприятие прошло
-def add_visit(event_title, visit_date, today):
+# Добавляет посещение в коллекцию, если есть название и мероприятие прошло
+def add_visit(visits_count, event_title, visit_date, today):
     has_title = event_title.strip() != ""
     is_past_event = visit_date <= today
-    return has_title and is_past_event
+    if has_title and is_past_event:
+        return visits_count + 1
+    return visits_count
 
 
-# Переводит введенную строку в оценку от 1 до 5, при ошибке возвращает 0
+# Выставляет оценку мероприятию: проверяет ввод и возвращает число от 1 до 5
 def rate_event(rating_text):
     rating_text = rating_text.strip()
     if not rating_text.isdecimal():
@@ -29,8 +31,8 @@ def rate_event(rating_text):
     return 0
 
 
-# Формирует карточку посещения: мероприятие, дата, сколько дней прошло, оценка
-def get_visit_card(event_title, category, visit_date, rating, today):
+# Выводит карточку посещения: мероприятие, дата, сколько дней прошло, оценка
+def show_visit_card(event_title, category, visit_date, rating, today):
     days_passed = (today - visit_date).days
     if days_passed == 0:
         when = "сегодня"
@@ -49,11 +51,9 @@ def get_visit_card(event_title, category, visit_date, rating, today):
             verdict = "не понравилось"
         rating_line = f"{stars} {rating}/{MAX_RATING} — {verdict}"
 
-    return (
-        f"Мероприятие: {event_title} ({category})\n"
-        f"Дата посещения: {visit_date.strftime('%d.%m.%Y')} ({when})\n"
-        f"Оценка: {rating_line}"
-    )
+    print(f"Мероприятие: {event_title} ({category})")
+    print(f"Дата посещения: {visit_date.strftime('%d.%m.%Y')} ({when})")
+    print(f"Оценка: {rating_line}")
 
 
 if __name__ == "__main__":
@@ -72,17 +72,19 @@ if __name__ == "__main__":
     print(f"Посещений в коллекции: {visits_count}")
     print()
 
-    if add_visit(event_title, visit_date, today):
-        visits_count += 1
+    new_visits_count = add_visit(visits_count, event_title, visit_date, today)
+
+    if new_visits_count > visits_count:
         print(f"Мероприятие «{event_title}» добавлено в коллекцию.")
-        print(f"Посещений в коллекции: {visits_count}")
+        print(f"Посещений в коллекции: {new_visits_count}")
 
         rating = rate_event(input("Оцените мероприятие от 1 до 5: "))
         if rating == 0:
             print("Оценка не распознана, посещение сохранено без оценки.")
 
         print()
-        print(get_visit_card(event_title, event_category, visit_date,
-                             rating, today))
+        show_visit_card(event_title, event_category, visit_date,
+                        rating, today)
     else:
-        print(f"Нельзя добавить «{event_title}»: мероприятие еще не прошло.")
+        print("Посещение не добавлено: не указано название "
+              "или мероприятие еще не прошло.")
