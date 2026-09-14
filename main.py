@@ -10,22 +10,15 @@ MIN_RATING = 1
 MAX_RATING = 5
 
 
+# Проверяет, можно ли добавить посещение: есть название и мероприятие прошло
 def add_visit(event_title, visit_date, today):
-    """Проверяет, можно ли добавить посещение в личную коллекцию.
-
-    Добавить можно мероприятие с заполненным названием,
-    которое уже состоялось: дата посещения не позже сегодняшней.
-    """
     has_title = event_title.strip() != ""
     is_past_event = visit_date <= today
     return has_title and is_past_event
 
 
+# Переводит введенную строку в оценку от 1 до 5, при ошибке возвращает 0
 def rate_event(rating_text):
-    """Преобразует введенную оценку в целое число от 1 до 5.
-
-    Возвращает 0, если введено не целое число или оно вне шкалы.
-    """
     rating_text = rating_text.strip()
     if not rating_text.isdecimal():
         return 0
@@ -36,8 +29,8 @@ def rate_event(rating_text):
     return 0
 
 
+# Формирует карточку посещения: мероприятие, дата, сколько дней прошло, оценка
 def get_visit_card(event_title, category, visit_date, rating, today):
-    """Формирует текст карточки посещения для просмотра в коллекции."""
     days_passed = (today - visit_date).days
     if days_passed == 0:
         when = "сегодня"
