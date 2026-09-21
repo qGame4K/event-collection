@@ -3,13 +3,14 @@
 from datetime import date
 from pathlib import Path
 
-from events import (add_event, find_events, format_event, get_categories,
-                    sort_events_by_date)
-from ratings import average_score, rate_event, remove_rating
+from models.events import (add_event, find_events, format_event,
+                           get_categories, sort_events_by_date)
+from models.ratings import average_score, rate_event, remove_rating
+from models.users import add_user, find_users, format_user, sort_users
+from models.visits import (add_visit, get_user_visits, remove_visit,
+                           show_visit_card)
 from storage import load_json, save_json
-from users import add_user, find_users, format_user, sort_users
 from utils import find_by, input_date, input_int
-from visits import add_visit, get_user_visits, remove_visit, show_visit_card
 
 DATA_DIR = Path(__file__).parent / "data"
 USERS_FILE = DATA_DIR / "users.json"

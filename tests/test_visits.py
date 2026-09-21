@@ -2,8 +2,8 @@ from datetime import date
 
 import pytest
 
-from visits import (add_visit, get_user_visits, has_visit, remove_visit,
-                    show_visit_card)
+from models.visits import (add_visit, get_user_visits, has_visit,
+                           remove_visit, show_visit_card)
 
 TODAY = date(2026, 9, 21)
 PAST_EVENT = {"id": 1, "title": "Концерт", "category": "концерт",

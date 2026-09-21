@@ -1,6 +1,6 @@
 import pytest
 
-from ratings import average_score, format_score, get_rating, rate_event
+from models.ratings import average_score, format_score, get_rating, rate_event
 
 
 def test_rate_event():

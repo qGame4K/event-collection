@@ -2,7 +2,8 @@ from datetime import date
 
 import pytest
 
-from events import add_event, find_events, is_past_event, sort_events_by_date
+from models.events import (add_event, find_events, is_past_event,
+                           sort_events_by_date)
 
 
 def test_add_event():

@@ -2,8 +2,8 @@
 
 from datetime import date
 
-from events import is_past_event
-from ratings import format_score, get_rating
+from models.events import is_past_event
+from models.ratings import format_score, get_rating
 from utils import find_by, next_id
 
 

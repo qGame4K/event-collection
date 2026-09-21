@@ -1,6 +1,6 @@
 import pytest
 
-from users import add_user, find_users, is_email_taken, sort_users
+from models.users import add_user, find_users, is_email_taken, sort_users
 
 
 def test_add_user():
