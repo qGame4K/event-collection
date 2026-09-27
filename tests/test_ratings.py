@@ -1,37 +1,44 @@
 import pytest
 
-from models.ratings import average_score, format_score, get_rating, rate_event
+from models import Rating
+from models.ratings import average_score
 
 
-def test_rate_event():
-    ratings = []
-    rate_event(ratings, 1, "5")
-    assert get_rating(ratings, 1) == 5
+def test_rating_creation():
+    rating = Rating(1, 5)
+    assert rating.id == 1
+    assert rating.score == 5
 
 
-def test_rate_event_updates_score():
-    ratings = []
-    rate_event(ratings, 1, "5")
-    rate_event(ratings, 1, "3")
-    assert len(ratings) == 1
-    assert get_rating(ratings, 1) == 3
-
-
-def test_rate_event_invalid_input():
+def test_rating_out_of_scale():
     with pytest.raises(ValueError):
-        rate_event([], 1, "десять")
+        Rating(1, 7)
+
+
+def test_rating_stars():
+    assert Rating(1, 4).stars == "★★★★☆"
+
+
+def test_rating_str():
+    assert str(Rating(1, 4)) == "★★★★☆ 4/5 — понравилось"
+
+
+def test_parse_score():
+    assert Rating.parse_score(" 5 ") == 5
+
+
+def test_parse_score_invalid():
     with pytest.raises(ValueError):
-        rate_event([], 1, "7")
+        Rating.parse_score("десять")
+
+
+def test_rating_from_data():
+    data = {"id": 2, "visit_id": 3, "score": 4}
+    rating = Rating.from_data(data)
+    assert rating.score == 4
+    assert rating.to_data(3) == data
 
 
 def test_average_score():
-    ratings = []
-    rate_event(ratings, 1, "5")
-    rate_event(ratings, 2, "4")
-    assert average_score(ratings) == 4.5
+    assert average_score([Rating(1, 5), Rating(2, 4)]) == 4.5
     assert average_score([]) == 0.0
-
-
-def test_format_score():
-    assert format_score(0) == "не выставлена"
-    assert format_score(4) == "★★★★☆ 4/5 — понравилось"
