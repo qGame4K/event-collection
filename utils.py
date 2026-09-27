@@ -1,19 +1,11 @@
-"""Вспомогательные функции: id, поиск записей и безопасный ввод."""
+"""Вспомогательные функции: номера объектов и безопасный ввод."""
 
 from datetime import date, datetime
 
 
-# Возвращает следующий свободный идентификатор для списка записей
-def next_id(items: list[dict]) -> int:
-    return max((item["id"] for item in items), default=0) + 1
-
-
-# Ищет запись, у которой поле field равно value; если нет — возвращает None
-def find_by(items: list[dict], field: str, value: object) -> dict | None:
-    for item in items:
-        if item[field] == value:
-            return item
-    return None
+# Возвращает следующий свободный номер для коллекции объектов
+def next_id(items: list) -> int:
+    return max((item.id for item in items), default=0) + 1
 
 
 # Запрашивает целое число, пока пользователь не введет его правильно

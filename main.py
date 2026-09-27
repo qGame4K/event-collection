@@ -3,14 +3,16 @@
 from datetime import date
 from pathlib import Path
 
-from models.events import (add_event, find_events, format_event,
+from models import Event, User, Visit
+from models.events import (add_event, find_event_by_id, find_events,
                            get_categories, sort_events_by_date)
-from models.ratings import average_score, rate_event, remove_rating
-from models.users import add_user, find_users, format_user, sort_users
-from models.visits import (add_visit, get_user_visits, remove_visit,
-                           show_visit_card)
-from storage import load_json, save_json
-from utils import find_by, input_date, input_int
+from models.ratings import average_score
+from models.users import add_user, find_user_by_id, find_users, sort_users
+from models.visits import (add_visit, collect_ratings, find_visit_by_id,
+                           get_user_visits, remove_visit)
+from storage import (load_events, load_ratings, load_users, load_visits,
+                     save_events, save_ratings, save_users, save_visits)
+from utils import input_date, input_int, next_id
 
 DATA_DIR = Path(__file__).parent / "data"
 USERS_FILE = DATA_DIR / "users.json"
@@ -32,12 +34,26 @@ MENU = (
 )
 
 
-# Точка запуска: загружает данные из JSON и обрабатывает пункты меню
+# Сценарий «отметить посещение»: находит объекты и создает посещение
+def add_new_visit(visits: list[Visit], users: list[User],
+                  events: list[Event], today: date) -> None:
+    user = find_user_by_id(users, input_int("ID пользователя: "))
+    event = find_event_by_id(events, input_int("ID мероприятия: "))
+    if user is None:
+        raise ValueError("Пользователь не найден.")
+    if event is None:
+        raise ValueError("Мероприятие не найдено.")
+    visit = add_visit(visits, user, event, today)
+    save_visits(VISITS_FILE, visits)
+    print(f"{visit} — добавлено в коллекцию.")
+
+
+# Точка запуска: создает объекты из JSON и обрабатывает пункты меню
 def main() -> None:
-    users = load_json(USERS_FILE)
-    events = load_json(EVENTS_FILE)
-    visits = load_json(VISITS_FILE)
-    ratings = load_json(RATINGS_FILE)
+    users = load_users(USERS_FILE)
+    events = load_events(EVENTS_FILE)
+    visits = load_visits(VISITS_FILE, users, events)
+    load_ratings(RATINGS_FILE, visits)
     today = date.today()
 
     while True:
@@ -48,61 +64,54 @@ def main() -> None:
             if choice == "1":
                 query = input("Часть имени (Enter — все): ")
                 for user in sort_users(find_users(users, query)):
-                    print(format_user(user))
+                    print(user)
             elif choice == "2":
                 name = input("Имя: ")
                 email = input("Email: ")
                 user = add_user(users, name, email)
-                save_json(USERS_FILE, users)
-                print(f"Добавлен пользователь {format_user(user)}")
+                save_users(USERS_FILE, users)
+                print(f"Добавлен пользователь {user}")
             elif choice == "3":
                 query = input("Часть названия (Enter — все): ")
                 for event in sort_events_by_date(find_events(events, query)):
-                    print(format_event(event))
+                    print(event)
             elif choice == "4":
                 title = input("Название: ")
                 category = input("Категория: ")
                 event_date = input_date("Дата (ДД.ММ.ГГГГ): ")
                 event = add_event(events, title, category, event_date)
-                save_json(EVENTS_FILE, events)
-                print(f"Добавлено мероприятие {format_event(event)}")
+                save_events(EVENTS_FILE, events)
+                print(f"Добавлено мероприятие {event}")
             elif choice == "5":
-                user = find_by(users, "id", input_int("ID пользователя: "))
-                event = find_by(events, "id", input_int("ID мероприятия: "))
-                if user is None:
-                    raise ValueError("Пользователь не найден.")
-                if event is None:
-                    raise ValueError("Мероприятие не найдено.")
-                visit = add_visit(visits, user["id"], event, today)
-                save_json(VISITS_FILE, visits)
-                print(f"Посещение №{visit['id']} добавлено в коллекцию.")
+                add_new_visit(visits, users, events, today)
             elif choice == "6":
                 visit_id = input_int("Номер посещения: ")
-                if find_by(visits, "id", visit_id) is None:
+                visit = find_visit_by_id(visits, visit_id)
+                if visit is None:
                     raise ValueError("Посещение не найдено.")
                 score_text = input("Оценка от 1 до 5: ")
-                rate_event(ratings, visit_id, score_text)
-                save_json(RATINGS_FILE, ratings)
-                print("Оценка сохранена.")
+                visit.rate(score_text, next_id(collect_ratings(visits)))
+                save_ratings(RATINGS_FILE, visits)
+                print(f"Оценка сохранена: {visit.rating}")
             elif choice == "7":
                 visit_id = input_int("Номер посещения: ")
                 if not remove_visit(visits, visit_id):
                     raise ValueError("Посещение не найдено.")
-                remove_rating(ratings, visit_id)
-                save_json(VISITS_FILE, visits)
-                save_json(RATINGS_FILE, ratings)
+                save_visits(VISITS_FILE, visits)
+                save_ratings(RATINGS_FILE, visits)
                 print("Посещение удалено.")
             elif choice == "8":
-                user = find_by(users, "id", input_int("ID пользователя: "))
+                user = find_user_by_id(users, input_int("ID пользователя: "))
                 if user is None:
                     raise ValueError("Пользователь не найден.")
-                user_visits = get_user_visits(visits, user["id"])
-                print(f"Коллекция пользователя {user['name']}")
+                user_visits = get_user_visits(visits, user)
+                print(f"Коллекция пользователя {user.name}")
                 print(f"Посещений: {len(user_visits)}")
                 for visit in user_visits:
                     print()
-                    show_visit_card(visit, events, ratings, today)
+                    print(visit.card(today))
             elif choice == "9":
+                ratings = collect_ratings(visits)
                 categories = ", ".join(sorted(get_categories(events)))
                 print(f"Пользователей: {len(users)}")
                 print(f"Мероприятий: {len(events)}")

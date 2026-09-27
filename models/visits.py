@@ -1,58 +1,106 @@
-"""Посещения: записи личной коллекции «пользователь был на мероприятии»."""
+"""Посещения: класс Visit и функции работы с коллекцией посещений."""
 
 from datetime import date
 
-from models.events import is_past_event
-from models.ratings import format_score, get_rating
-from utils import find_by, next_id
+from utils import next_id
+
+from .events import Event, find_event_by_id
+from .ratings import Rating
+from .users import User, find_user_by_id
+
+
+# Посещение: связывает пользователя с мероприятием и хранит его оценку
+class Visit:
+    # Создает посещение и запоминает объекты пользователя и мероприятия
+    def __init__(self, visit_id: int, user: User, event: Event,
+                 rating: Rating | None = None) -> None:
+        self.id = visit_id
+        self.user = user
+        self.event = event
+        self.rating = rating
+
+    # Ставит оценку посещению: новая оценка или замена старой
+    def rate(self, score_text: str, rating_id: int) -> Rating:
+        score = Rating.parse_score(score_text)
+        if self.rating is not None:
+            rating_id = self.rating.id
+        self.rating = Rating(rating_id, score)
+        return self.rating
+
+    # Считает, сколько дней прошло с даты мероприятия
+    def days_passed(self, today: date) -> int:
+        return (today - self.event.date).days
+
+    # Формирует карточку посещения для просмотра в коллекции
+    def card(self, today: date) -> str:
+        days = self.days_passed(today)
+        when = "сегодня" if days == 0 else f"{days} дн. назад"
+        score = "не выставлена" if self.rating is None else str(self.rating)
+        return (f"{self}\n"
+                f"Дата: {self.event.date.strftime('%d.%m.%Y')} ({when})\n"
+                f"Оценка: {score}")
+
+    # Создает посещение из данных JSON, находя пользователя и мероприятие
+    @classmethod
+    def from_data(cls, data: dict, users: list[User],
+                  events: list[Event]) -> "Visit | None":
+        user = find_user_by_id(users, data["user_id"])
+        event = find_event_by_id(events, data["event_id"])
+        if user is None or event is None:
+            return None
+        return cls(data["id"], user, event)
+
+    # Превращает посещение в данные для JSON (связи — по номерам)
+    def to_data(self) -> dict:
+        return {"id": self.id, "user_id": self.user.id,
+                "event_id": self.event.id}
+
+    # Строковое представление посещения
+    def __str__(self) -> str:
+        return (f"Посещение №{self.id}: {self.event.title} "
+                f"({self.event.category})")
+
+
+# Ищет посещение по номеру; если его нет — возвращает None
+def find_visit_by_id(visits: list[Visit], visit_id: int) -> Visit | None:
+    for visit in visits:
+        if visit.id == visit_id:
+            return visit
+    return None
 
 
 # Проверяет, есть ли уже это мероприятие в коллекции пользователя
-def has_visit(visits: list[dict], user_id: int, event_id: int) -> bool:
-    return any(
-        visit["user_id"] == user_id and visit["event_id"] == event_id
-        for visit in visits
-    )
+def has_visit(visits: list[Visit], user: User, event: Event) -> bool:
+    return any(visit.user.id == user.id and visit.event.id == event.id
+               for visit in visits)
 
 
-# Добавляет посещение, если мероприятие уже прошло и его нет в коллекции
-def add_visit(visits: list[dict], user_id: int, event: dict,
-              today: date) -> dict:
-    if not is_past_event(event, today):
+# Создает объект Visit, если мероприятие прошло и его нет в коллекции
+def add_visit(visits: list[Visit], user: User, event: Event,
+              today: date) -> Visit:
+    if not event.is_past(today):
         raise ValueError("Мероприятие еще не прошло.")
-    if has_visit(visits, user_id, event["id"]):
+    if has_visit(visits, user, event):
         raise ValueError("Мероприятие уже есть в коллекции.")
-    visit = {"id": next_id(visits), "user_id": user_id,
-             "event_id": event["id"]}
+    visit = Visit(next_id(visits), user, event)
     visits.append(visit)
     return visit
 
 
 # Возвращает посещения выбранного пользователя
-def get_user_visits(visits: list[dict], user_id: int) -> list[dict]:
-    return [visit for visit in visits if visit["user_id"] == user_id]
+def get_user_visits(visits: list[Visit], user: User) -> list[Visit]:
+    return [visit for visit in visits if visit.user.id == user.id]
 
 
-# Удаляет посещение по номеру, возвращает True, если оно было найдено
-def remove_visit(visits: list[dict], visit_id: int) -> bool:
-    visit = find_by(visits, "id", visit_id)
+# Удаляет посещение по номеру вместе с его оценкой
+def remove_visit(visits: list[Visit], visit_id: int) -> bool:
+    visit = find_visit_by_id(visits, visit_id)
     if visit is None:
         return False
     visits.remove(visit)
     return True
 
 
-# Выводит карточку посещения: мероприятие, дата, сколько дней прошло, оценка
-def show_visit_card(visit: dict, events: list[dict], ratings: list[dict],
-                    today: date) -> None:
-    event = find_by(events, "id", visit["event_id"])
-    if event is None:
-        print(f"Посещение №{visit['id']}: мероприятие не найдено")
-        return
-    event_date = date.fromisoformat(event["date"])
-    days_passed = (today - event_date).days
-    when = "сегодня" if days_passed == 0 else f"{days_passed} дн. назад"
-    score = get_rating(ratings, visit["id"])
-    print(f"Посещение №{visit['id']}: {event['title']} ({event['category']})")
-    print(f"Дата: {event_date.strftime('%d.%m.%Y')} ({when})")
-    print(f"Оценка: {format_score(score)}")
+# Собирает оценки всех посещений в один список
+def collect_ratings(visits: list[Visit]) -> list[Rating]:
+    return [visit.rating for visit in visits if visit.rating is not None]
