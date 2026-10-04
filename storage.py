@@ -6,6 +6,12 @@ from pathlib import Path
 from models import Event, Rating, User, Visit
 from models.visits import find_visit_by_id
 
+DATA_DIR = Path(__file__).parent / "data"
+USERS_FILE = DATA_DIR / "users.json"
+EVENTS_FILE = DATA_DIR / "events.json"
+VISITS_FILE = DATA_DIR / "visits.json"
+RATINGS_FILE = DATA_DIR / "ratings.json"
+
 
 # Загружает список записей из JSON; при ошибке файла возвращает пустой список
 def load_json(path: Path) -> list[dict]:

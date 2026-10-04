@@ -1,7 +1,6 @@
 """Event Collection — консольное приложение личной коллекции мероприятий."""
 
 from datetime import date
-from pathlib import Path
 
 from models import Event, User, Visit
 from models.events import (add_event, find_event_by_id, find_events,
@@ -10,15 +9,10 @@ from models.ratings import average_score
 from models.users import add_user, find_user_by_id, find_users, sort_users
 from models.visits import (add_visit, collect_ratings, find_visit_by_id,
                            get_user_visits, remove_visit)
-from storage import (load_events, load_ratings, load_users, load_visits,
+from storage import (EVENTS_FILE, RATINGS_FILE, USERS_FILE, VISITS_FILE,
+                     load_events, load_ratings, load_users, load_visits,
                      save_events, save_ratings, save_users, save_visits)
 from utils import input_date, input_int, next_id
-
-DATA_DIR = Path(__file__).parent / "data"
-USERS_FILE = DATA_DIR / "users.json"
-EVENTS_FILE = DATA_DIR / "events.json"
-VISITS_FILE = DATA_DIR / "visits.json"
-RATINGS_FILE = DATA_DIR / "ratings.json"
 
 MENU = (
     "1. Пользователи",
