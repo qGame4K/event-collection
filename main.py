@@ -95,11 +95,12 @@ def main() -> None:
                 save_ratings(RATINGS_FILE, visits)
                 print("Посещение удалено.")
             elif choice == "8":
-                user = find_user_by_id(users, input_int("ID пользователя: "))
-                if user is None:
+                user_id = input_int("ID пользователя: ")
+                owner = find_user_by_id(users, user_id)
+                if owner is None:
                     raise ValueError("Пользователь не найден.")
-                user_visits = get_user_visits(visits, user)
-                print(f"Коллекция пользователя {user.name}")
+                user_visits = get_user_visits(visits, owner)
+                print(f"Коллекция пользователя {owner.name}")
                 print(f"Посещений: {len(user_visits)}")
                 for visit in user_visits:
                     print()
