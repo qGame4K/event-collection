@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if event %}
+    {{ event.title }} — Event Collection
+  {% else %}
+    Мероприятие не найдено — Event Collection
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% if event %}
+    <div class="card event-card">
+      <div class="card-body">
+        <h1 class="card-title h3">{{ event.title }}</h1>
+        <p class="card-text">Номер: {{ event.id }}</p>
+        <p class="card-text">Категория: {{ event.category }}</p>
+        <p class="card-text">
+          Дата: {{ event.date|date:"d.m.Y" }}
+          {% if passed %}
+            <span class="badge bg-secondary">уже прошло</span>
+          {% else %}
+            <span class="badge bg-success">еще не прошло</span>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  {% else %}
+    <h1 class="text-danger">Мероприятие не найдено</h1>
+    <p>Мероприятие с указанным номером отсутствует.</p>
+  {% endif %}
+  <a href="{% url 'events:list' %}" class="btn btn-outline-secondary mt-3">
+    ← к списку мероприятий
+  </a>
+{% endblock %}

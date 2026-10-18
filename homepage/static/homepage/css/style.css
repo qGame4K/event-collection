@@ -1,0 +1,31 @@
+/* Собственные стили проекта Event Collection */
+
+body {
+    min-height: 100vh;
+}
+
+.site-logo {
+    width: 120px;
+    height: auto;
+    margin: 1rem 0;
+}
+
+.site-footer {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 0.5rem;
+    color: #6c757d;
+}
+
+.event-card {
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+}
+
+.event-card .card-title {
+    color: #0d4c73;
+}
+
+.visit-rating {
+    font-weight: 600;
+    letter-spacing: 1px;
+}

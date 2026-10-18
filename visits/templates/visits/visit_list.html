@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Посещения — Event Collection{% endblock %}
+
+{% block content %}
+  <h1>Посещения</h1>
+  <p>Всего посещений: {{ visits|length }}</p>
+  <ul class="list-group">
+    {% for visit in visits %}
+      <li class="list-group-item d-flex justify-content-between">
+        <a href="{% url 'visits:detail' visit.id %}">
+          {{ visit.event.title }} — {{ visit.user.name }}
+        </a>
+        {% include "visits/includes/visit_rating.html" %}
+      </li>
+    {% empty %}
+      <li class="list-group-item">Посещения не найдены.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

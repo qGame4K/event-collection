@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Event Collection{% endblock %}
+
+{% block content %}
+  <h1 class="display-5">Event Collection</h1>
+  <p class="lead">Личная коллекция посещенных мероприятий.</p>
+  <p>Основные разделы:</p>
+  <a href="{% url 'events:list' %}" class="btn btn-primary me-2">
+    Мероприятия
+  </a>
+  <a href="{% url 'visits:list' %}" class="btn btn-secondary">
+    Посещения
+  </a>
+{% endblock %}

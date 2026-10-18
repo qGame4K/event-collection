@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if visit %}
+    Посещение №{{ visit.id }} — Event Collection
+  {% else %}
+    Посещение не найдено — Event Collection
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% if visit %}
+    <div class="card">
+      <div class="card-body">
+        <h1 class="card-title h3">Посещение №{{ visit.id }}</h1>
+        <p class="card-text">
+          Мероприятие:
+          <a href="{% url 'events:detail' visit.event.id %}">
+            {{ visit.event.title }}
+          </a>
+        </p>
+        <p class="card-text">
+          Дата: {{ visit.event.date|date:"d.m.Y" }} ({{ days }} дн. назад)
+        </p>
+        <p class="card-text">
+          Пользователь: {{ visit.user.name|default:"не указан" }}
+        </p>
+        <p class="card-text">
+          Оценка: {% include "visits/includes/visit_rating.html" %}
+        </p>
+      </div>
+    </div>
+  {% else %}
+    <h1 class="text-danger">Посещение не найдено</h1>
+    <p>Посещение с указанным номером отсутствует.</p>
+  {% endif %}
+  <a href="{% url 'visits:list' %}" class="btn btn-outline-secondary mt-3">
+    ← к списку посещений
+  </a>
+{% endblock %}

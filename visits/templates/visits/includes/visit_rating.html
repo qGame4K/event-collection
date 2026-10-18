@@ -1,0 +1,7 @@
+{% if visit.rating %}
+  <span class="badge bg-success visit-rating">
+    {{ visit.rating.stars }} {{ visit.rating.score }}/5
+  </span>
+{% else %}
+  <span class="badge bg-secondary visit-rating">без оценки</span>
+{% endif %}
