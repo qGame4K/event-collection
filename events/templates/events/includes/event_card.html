@@ -2,7 +2,7 @@
   <div class="card-body">
     <h2 class="card-title h5">{{ event.title|default:"Без названия" }}</h2>
     <p class="card-text">
-      {{ event.date|date:"d.m.Y" }} — {{ event.category }}
+      {{ event.date_display }} — {{ event.category }}
     </p>
     <a href="{% url 'events:detail' event.id %}" class="btn btn-primary">
       Подробнее

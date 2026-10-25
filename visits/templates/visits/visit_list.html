@@ -9,7 +9,7 @@
     {% for visit in visits %}
       <li class="list-group-item d-flex justify-content-between">
         <a href="{% url 'visits:detail' visit.id %}">
-          {{ visit.event.title }} — {{ visit.user.name }}
+          {{ visit.event_title }} — {{ visit.user_name }}
         </a>
         {% include "visits/includes/visit_rating.html" %}
       </li>

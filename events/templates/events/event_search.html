@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск мероприятий — Event Collection{% endblock %}
+
+{% block content %}
+  <h1>Поиск мероприятий</h1>
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+      <label for="q" class="form-label">Часть названия</label>
+      <input
+        type="text"
+        id="q"
+        name="q"
+        value="{{ query }}"
+        class="form-control"
+      >
+    </div>
+    <div class="col-auto">
+      <label for="category" class="form-label">Категория</label>
+      <select id="category" name="category" class="form-select">
+        <option value="">любая</option>
+        {% for item in categories %}
+          <option
+            value="{{ item.category }}"
+            {% if item.category == category %}selected{% endif %}
+          >
+            {{ item.category }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto align-self-end">
+      <button type="submit" class="btn btn-primary">Найти</button>
+    </div>
+  </form>
+
+  <p>Найдено мероприятий: {{ events|length }}</p>
+  {% for event in events %}
+    {% include "events/includes/event_card.html" %}
+  {% empty %}
+    <p>По заданным условиям мероприятия не найдены.</p>
+  {% endfor %}
+{% endblock %}

@@ -15,15 +15,14 @@
         <h1 class="card-title h3">Посещение №{{ visit.id }}</h1>
         <p class="card-text">
           Мероприятие:
-          <a href="{% url 'events:detail' visit.event.id %}">
-            {{ visit.event.title }}
+          <a href="{% url 'events:detail' visit.event_id %}">
+            {{ visit.event_title }}
           </a>
+          ({{ visit.category }})
         </p>
+        <p class="card-text">Дата: {{ visit.date_display }}</p>
         <p class="card-text">
-          Дата: {{ visit.event.date|date:"d.m.Y" }} ({{ days }} дн. назад)
-        </p>
-        <p class="card-text">
-          Пользователь: {{ visit.user.name|default:"не указан" }}
+          Пользователь: {{ visit.user_name }} ({{ visit.user_email }})
         </p>
         <p class="card-text">
           Оценка: {% include "visits/includes/visit_rating.html" %}

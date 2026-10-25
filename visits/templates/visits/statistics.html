@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика — Event Collection{% endblock %}
+
+{% block content %}
+  <h1>Статистика</h1>
+
+  <ul class="list-group mb-4">
+    <li class="list-group-item">
+      Пользователей: {{ totals.users_count }}
+    </li>
+    <li class="list-group-item">
+      Мероприятий: {{ totals.events_count }}
+    </li>
+    <li class="list-group-item">
+      Посещений: {{ totals.visits_count }}
+    </li>
+    <li class="list-group-item">
+      Средняя оценка: {{ totals.average_score|default:"нет оценок" }}
+    </li>
+  </ul>
+
+  <h2 class="h4">Посещения по категориям</h2>
+  <table class="table table-bordered align-middle">
+    <thead>
+      <tr>
+        <th>Категория</th>
+        <th>Посещений</th>
+        <th>Средняя оценка</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in categories %}
+        <tr>
+          <td>{{ item.category }}</td>
+          <td>{{ item.visits_count }}</td>
+          <td>{{ item.average_score|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="3">Данные отсутствуют.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2 class="h4">Популярные категории</h2>
+  <p>Категории, где посещений больше {{ min_visits }}:</p>
+  <ul class="list-group">
+    {% for item in popular %}
+      <li class="list-group-item d-flex justify-content-between">
+        {{ item.category }}
+        <span class="badge bg-success">{{ item.visits_count }}</span>
+      </li>
+    {% empty %}
+      <li class="list-group-item">
+        Пока нет категорий с таким числом посещений.
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

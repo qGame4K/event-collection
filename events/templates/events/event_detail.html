@@ -16,12 +16,16 @@
         <p class="card-text">Номер: {{ event.id }}</p>
         <p class="card-text">Категория: {{ event.category }}</p>
         <p class="card-text">
-          Дата: {{ event.date|date:"d.m.Y" }}
-          {% if passed %}
+          Дата: {{ event.date_display }}
+          {% if event.is_past %}
             <span class="badge bg-secondary">уже прошло</span>
           {% else %}
             <span class="badge bg-success">еще не прошло</span>
           {% endif %}
+        </p>
+        <p class="card-text">
+          Посещений: {{ event.visits_count }},
+          средняя оценка: {{ event.average_score|default:"нет оценок" }}
         </p>
       </div>
     </div>
