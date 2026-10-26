@@ -191,3 +191,21 @@ LEFT JOIN ratings
     ON ratings.visit_id = visits.id
 WHERE ratings.score IS NULL
 ORDER BY visits.id;
+
+-- 17. Мероприятия выбранной категории, которые уже прошли
+--     (два условия сразу: категория и дата)
+SELECT
+    id,
+    title,
+    category,
+    date
+FROM events
+WHERE category = ?
+  AND date <= date('now')
+ORDER BY date DESC;
+
+-- 18. Сколько посещений у выбранного мероприятия
+SELECT
+    COUNT(*) AS visits_count
+FROM visits
+WHERE event_id = ?;
